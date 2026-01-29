@@ -1,0 +1,32 @@
+@startuml
+title SCFMS+ — Collaboration (Communication) Diagram
+' Scenario: Student books a room; system suggests alternatives on conflict.
+
+skinparam linetype ortho
+
+object "StudentUI" as UI
+object "BookingController" as BC
+object "RoomRepository" as RR
+object "RecommendationService" as RS
+object "ReservationRepository" as ReR
+object "NotificationService" as NS
+
+UI  -> BC  : 1: requestBooking(criteria)
+BC  -> RR  : 2: findAvailable(criteria)
+RR  --> BC : 3: availableRooms
+
+BC  -> BC  : 4: detectConflicts(availableRooms)
+
+BC  -> RS  : 5: recommend(criteria, availableRooms)\n[if none match perfectly]
+RS  --> BC : 6: rankedAlternatives
+
+BC  -> UI  : 7: showOptions(availableRooms, rankedAlternatives)
+UI  -> BC  : 8: confirmSelection(roomId)
+
+BC  -> ReR : 9: saveReservation(student, roomId, timeslot)
+ReR --> BC : 10: reservationId
+
+BC  -> NS  : 11: sendConfirmation(student, reservationId)
+NS  --> UI : 12: confirmationDisplayed
+
+@enduml

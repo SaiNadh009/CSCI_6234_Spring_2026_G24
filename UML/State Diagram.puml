@@ -1,0 +1,20 @@
+@startuml
+title SCFMS+ — State Diagram (Reservation Lifecycle)
+
+[*] --> Requested
+
+Requested --> Confirmed : room selected\nreservation created
+Requested --> Cancelled : user cancels
+
+Confirmed --> CheckedIn : QR check-in\nwithin grace period
+Confirmed --> Cancelled : user/admin cancels
+Confirmed --> NoShowReleased : grace period expires\n(no check-in)
+
+CheckedIn --> Completed : end time reached
+CheckedIn --> Cancelled : admin cancels\n(rare, policy)
+
+NoShowReleased --> [*]
+Cancelled --> [*]
+Completed --> [*]
+
+@enduml

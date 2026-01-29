@@ -1,0 +1,47 @@
+@startuml
+title SCFMS+ — Component Diagram
+
+skinparam componentStyle rectangle
+
+package "Client" {
+  [Web/Mobile UI] as UI
+}
+
+package "Backend API" {
+  [REST Controller] as API
+  [Auth & RBAC] as AUTH
+  [Booking Service] as BOOK
+  [QR Check-In Service] as QR
+  [Recommendation Engine] as REC
+  [Maintenance Service] as MAIN
+  [Predictive Maintenance Service] as PMS
+  [Notification Service] as NOTIF
+  [Analytics Service] as ANALYTICS
+}
+
+database "Relational DB" as DB
+queue "Email/SMS Provider" as MSG
+
+UI --> API
+
+API --> AUTH
+API --> BOOK
+API --> MAIN
+API --> ANALYTICS
+
+BOOK --> REC
+BOOK --> QR
+BOOK --> NOTIF
+BOOK --> DB
+
+MAIN --> DB
+MAIN --> NOTIF
+MAIN --> PMS
+
+PMS --> DB
+
+ANALYTICS --> DB
+
+NOTIF --> MSG
+
+@enduml

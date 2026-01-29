@@ -1,0 +1,25 @@
+@startuml
+title SCFMS+ — Sequence Diagram (Auto-release No-Show)
+
+actor Scheduler
+participant "ReservationService" as RS
+database "ReservationRepository" as RRepo
+participant "Reservation" as R
+participant "NotificationService" as NS
+participant "AnalyticsService" as AS
+
+Scheduler -> RS : runNoShowSweep(now)
+RS -> RRepo : findConfirmedStartingBefore(now - gracePeriod)
+RRepo --> RS : reservations[]
+
+loop for each reservation
+  RS -> R : autoReleaseNoShow()
+  R --> RS : state=NoShowReleased
+  RS -> RRepo : save(R)
+  RS -> NS : notifyUserNoShow(R.user, R.id)
+  RS -> AS : recordNoShow(R.room, R.timeslot)
+end
+
+RS --> Scheduler : sweepComplete
+
+@enduml

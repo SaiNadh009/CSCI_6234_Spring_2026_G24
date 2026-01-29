@@ -1,0 +1,41 @@
+@startuml
+title SCFMS+ — Activity Diagram (Smart Booking + QR Check-In)
+
+start
+:User enters booking needs
+(date/time, capacity, equipment);
+
+:System searches available rooms;
+
+if (Room available?) then (yes)
+  :Create reservation (Confirmed);
+else (no)
+  :Run recommendation engine;
+  :Show top alternative rooms;
+  if (User selects an alternative?) then (yes)
+    :Create reservation (Confirmed);
+  else (no)
+    :End without booking;
+    stop
+  endif
+endif
+
+:Send confirmation notification;
+
+:At booking start time;
+:Display QR code at room / app;
+
+if (User checks in within grace period?) then (yes)
+  :Mark reservation CheckedIn;
+  :Allow room usage;
+  :At end time -> Mark Completed;
+  :Send completion notification;
+  stop
+else (no)
+  :Auto-cancel (No-Show);
+  :Release room immediately;
+  :Notify user + update analytics;
+  stop
+endif
+
+@enduml

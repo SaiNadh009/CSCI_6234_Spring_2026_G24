@@ -1,0 +1,179 @@
+@startuml
+title SCFMS+ — Class Diagram (Core Domain)
+
+skinparam classAttributeIconSize 0
+
+' ===== Users =====
+abstract class User {
+  -id: UUID
+  -name: String
+  -email: String
+  +getRole(): Role
+}
+
+class Student
+class Staff
+class Technician {
+  -skills: Set<Skill>
+  +updateWorkOrderStatus(id, status)
+}
+class Admin {
+  +configurePolicy(policy: Policy)
+}
+
+User <|-- Student
+User <|-- Staff
+User <|-- Technician
+User <|-- Admin
+
+enum Role { STUDENT; STAFF; TECHNICIAN; ADMIN }
+
+' ===== Rooms & Assets =====
+class Room {
+  -roomId: String
+  -capacity: int
+  -location: String
+  -features: Set<Feature>
+  +isAvailable(timeslot): boolean
+}
+
+class Asset {
+  -assetId: String
+  -name: String
+  -type: AssetType
+  -condition: Condition
+}
+
+enum AssetType { PROJECTOR; LAB_KIT; MICROPHONE; OTHER }
+
+Room "1" o-- "*" Asset : contains >
+
+' ===== Reservations (State pattern) =====
+class Reservation {
+  -reservationId: UUID
+  -timeslot: TimeSlot
+  -state: ReservationState
+  -qrToken: String
+  +checkIn(code): void
+  +cancel(): void
+  +autoReleaseNoShow(): void
+}
+
+interface ReservationState {
+  +checkIn(r: Reservation, code): void
+  +cancel(r: Reservation): void
+  +autoReleaseNoShow(r: Reservation): void
+  +name(): String
+}
+
+class ConfirmedState
+class CheckedInState
+class CompletedState
+class CancelledState
+class NoShowReleasedState
+
+ReservationState <|.. ConfirmedState
+ReservationState <|.. CheckedInState
+ReservationState <|.. CompletedState
+ReservationState <|.. CancelledState
+ReservationState <|.. NoShowReleasedState
+
+Reservation "*" --> "1" Room : reserves >
+Reservation "*" --> "1" User : bookedBy >
+
+class TimeSlot {
+  -start: DateTime
+  -end: DateTime
+}
+
+' ===== Maintenance =====
+class Ticket {
+  -ticketId: UUID
+  -category: Category
+  -priority: Priority
+  -status: TicketStatus
+  -description: String
+  +addComment(text)
+  +close()
+}
+
+class WorkOrder {
+  -workOrderId: UUID
+  -status: WorkStatus
+  -dueDate: Date
+  +assignTo(t: Technician)
+  +markDone()
+}
+
+Ticket "1" o-- "0..1" WorkOrder : may create >
+Ticket "*" --> "0..1" Room : relatedTo >
+Ticket "*" --> "0..1" Asset : relatedTo >
+
+enum TicketStatus { OPEN; IN_PROGRESS; RESOLVED; CLOSED }
+enum WorkStatus { ASSIGNED; IN_PROGRESS; DONE }
+enum Priority { LOW; MEDIUM; HIGH; URGENT }
+
+' ===== Smart Recommendations (Strategy pattern) =====
+interface RecommendationStrategy {
+  +rankRooms(criteria: Criteria, rooms: List<Room>): List<Room>
+}
+
+class CapacityFirstStrategy
+class DistanceFirstStrategy
+class EquipmentMatchStrategy
+
+RecommendationStrategy <|.. CapacityFirstStrategy
+RecommendationStrategy <|.. DistanceFirstStrategy
+RecommendationStrategy <|.. EquipmentMatchStrategy
+
+class RecommendationService {
+  -strategies: List<RecommendationStrategy>
+  +recommend(criteria: Criteria, rooms: List<Room>): List<Room>
+}
+
+RecommendationService --> RecommendationStrategy : uses >
+
+class Criteria {
+  +capacityNeeded: int
+  +requiredFeatures: Set<Feature>
+  +preferredLocation: String
+}
+
+' ===== Predictive Maintenance (Strategy pattern) =====
+interface RiskScoringStrategy {
+  +score(tickets: List<Ticket>): int
+}
+
+class FrequencyBasedScoring
+class RecencyWeightedScoring
+
+RiskScoringStrategy <|.. FrequencyBasedScoring
+RiskScoringStrategy <|.. RecencyWeightedScoring
+
+class PredictiveMaintenanceService {
+  -strategy: RiskScoringStrategy
+  +riskScoreFor(roomOrAssetId): int
+}
+
+PredictiveMaintenanceService --> RiskScoringStrategy : uses >
+PredictiveMaintenanceService --> Ticket : analyzes >
+
+' ===== Notifications =====
+interface Notifier {
+  +notify(user: User, message: String): void
+}
+
+class EmailNotifier
+class InAppNotifier
+
+Notifier <|.. EmailNotifier
+Notifier <|.. InAppNotifier
+
+class NotificationService {
+  -channels: List<Notifier>
+  +send(user, message): void
+}
+
+NotificationService --> Notifier : uses >
+
+@enduml
