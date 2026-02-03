@@ -1,0 +1,63 @@
+@startuml
+title SCFMS+ — Use Case Diagram
+
+left to right direction
+
+actor Student
+actor Staff
+actor Technician
+actor Admin
+
+rectangle "SCFMS+" {
+  usecase "Search Available Rooms" as UC1
+  usecase "Book Room" as UC2
+  usecase "Get Alternative\nRoom Recommendations" as UC3
+  usecase "QR Check-In" as UC4
+  usecase "Cancel Booking" as UC5
+
+  usecase "Check Out Equipment" as UC6
+  usecase "Return Equipment" as UC7
+
+  usecase "Submit Maintenance Ticket" as UC8
+  usecase "Track Ticket Status" as UC9
+  usecase "Assign Work Order" as UC10
+  usecase "Resolve Ticket" as UC11
+
+  usecase "Manage Rooms & Assets" as UC12
+  usecase "View Analytics Dashboard" as UC13
+  usecase "Configure Policies\n(Grace Period, Rules)" as UC14
+}
+
+Student --> UC1
+Student --> UC2
+Student --> UC4
+Student --> UC5
+Student --> UC6
+Student --> UC7
+Student --> UC8
+Student --> UC9
+
+Staff --> UC1
+Staff --> UC2
+Staff --> UC4
+Staff --> UC5
+Staff --> UC6
+Staff --> UC7
+Staff --> UC8
+Staff --> UC9
+
+UC2 .> UC3 : <<include>>
+UC4 .> UC2 : <<extend>>\n(for confirmed booking)
+
+Technician --> UC10
+Technician --> UC11
+Technician --> UC9
+
+Admin --> UC12
+Admin --> UC13
+Admin --> UC14
+Admin --> UC10
+
+UC10 .> UC8 : <<extend>>\n(when ticket created)
+
+@enduml
