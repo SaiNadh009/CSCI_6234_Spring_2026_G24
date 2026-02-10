@@ -1,0 +1,75 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam actorStyle stickman
+
+title Object Oriented Design (OOD) Assignment
+
+' --- Actors first (forces use-case diagram parsing) ---
+actor Notif as "Notification\nService"
+actor Student as "Student"
+
+' --- Actor descriptions (beside actors) ---
+note right of Student
+**Student (Primary Actor):**
+The main user of the system who searches available rooms, books rooms, performs BR check-in when applicable,
+submits maintenance tickets, and tracks ticket progress/status.
+end note
+
+note right of Notif
+**Notification Service (Supporting Actor):**
+An external service that delivers notifications triggered by system events (e.g., booking confirmations,
+ticket creation acknowledgements, and ticket status updates) to keep the student informed.
+end note
+
+' --- Use cases ---
+usecase UC_Auth    as "Authenticate\nCredentials"
+usecase UC_Book    as "Book\nRoom"
+usecase UC_CheckIn as "BR\nCheck-in"
+usecase UC_Track   as "Track\nTicket\nStatus"
+usecase UC_Search  as "Search\nAvailable\nRoom"
+usecase UC_Maint   as "Submit\nMaintenance\nTicket"
+
+' --- Use case descriptions (beside each use case) ---
+note right of UC_Auth
+Validates the student’s login/identity and permissions before allowing protected actions.
+Modeled as an **extend** to booking when authentication is required.
+end note
+
+note right of UC_Book
+Creates a room reservation after the student selects a valid time slot and room.
+This use case **includes** searching for available rooms as a required sub-step.
+end note
+
+note right of UC_CheckIn
+Records that the student has arrived/started using the reserved room within the allowed time window.
+Modeled as an **extend** of booking because it applies only when a booking exists.
+end note
+
+note right of UC_Search
+Finds rooms that are free based on criteria (date/time/capacity/location) and returns available options.
+Also used as a mandatory sub-flow inside **Book Room**.
+end note
+
+note right of UC_Maint
+Lets the student report a facilities issue (location, description, urgency).
+Creates a ticket that can be tracked and can trigger notifications to the student.
+end note
+
+note right of UC_Track
+Displays the current progress of a maintenance ticket (e.g., submitted/in progress/resolved) along with updates.
+Works with notifications so the student can monitor progress without repeated manual follow-ups.
+end note
+
+' --- Assignment notes ---
+note top
+Name  : Sai Sai Nath Boddu
+GWID  : G22742105
+Group : Group 24
+end note
+
+note bottom
+There are 6 use cases used here.
+end note
+
+' --- Associations (
