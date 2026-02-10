@@ -1,0 +1,51 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam actorStyle stickman
+
+title Object Oriented Design (OOD) Assignment
+
+' --- Actors first (forces use-case diagram parsing) ---
+actor Notif as "Notification\nService"
+actor Student as "Student"
+
+' --- Use cases ---
+usecase UC_Auth   as "Authenticate\nCredentials"
+usecase UC_Book   as "Book\nRoom"
+usecase UC_CheckIn as "BR\nCheck-in"
+usecase UC_Track  as "Track\nTicket\nStatus"
+usecase UC_Search as "Search\nAvailable\nRoom"
+usecase UC_Maint  as "Submit\nMaintenance\nTicket"
+
+' --- Notes (after diagram type is clear) ---
+note top
+Name  : Sai Sai Nath Boddu
+GWID  : G22742105
+Group : Group 24
+end note
+
+note bottom
+There are 6 use cases used here.
+end note
+
+' --- Associations (solid) ---
+Notif --> UC_CheckIn
+Notif --> UC_Track
+
+Student --> UC_CheckIn
+Student --> UC_Track
+Student --> UC_Book
+Student --> UC_Maint
+Student --> UC_Search
+
+' --- Use-case relationships (dashed) ---
+UC_Auth ..> UC_Book    : <<extend>>
+UC_CheckIn ..> UC_Book : <<extend>>
+UC_Book ..> UC_Search  : <<include>>
+
+' --- Layout hints (optional) ---
+UC_Auth -[hidden]-> UC_Book
+UC_CheckIn -[hidden]-> UC_Book
+UC_Track -[hidden]-> UC_Search
+UC_Maint -[hidden]-> UC_Track
+@enduml
