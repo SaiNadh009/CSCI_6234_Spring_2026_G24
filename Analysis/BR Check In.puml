@@ -1,0 +1,20 @@
+@startuml
+title Robustness Diagram — BR Check-in
+left to right direction
+skinparam shadowing false
+
+actor Student
+boundary "Check-in UI" as B_CheckIn
+control "CheckInController" as C_CheckIn
+entity "Booking" as E_Booking
+entity "Room" as E_Room
+entity "CheckInLog" as E_Log
+
+Student --> B_CheckIn : open booking
+B_CheckIn --> C_CheckIn : checkIn(bookingId)
+C_CheckIn --> E_Booking : validate booking window
+E_Booking --> E_Room : room details
+C_CheckIn --> E_Log : record check-in
+C_CheckIn --> B_CheckIn : status/receipt
+B_CheckIn --> Student : display check-in status
+@enduml
