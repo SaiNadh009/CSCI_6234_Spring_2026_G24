@@ -1,0 +1,24 @@
+@startuml
+title sd robustness_diagram_book_room
+skinparam linetype ortho
+
+actor "Student" as Student
+
+boundary "Room Booking UI" as RBUI
+control "RoomBookingController" as RBC
+entity "Room" as Room
+entity "Booking" as Booking
+entity "AvailabilityCalendar" as Cal
+
+Student --> RBUI : start booking
+RBUI --> Student : display progress
+
+RBUI --> RBC : bookRoom(requestDetails)
+RBC --> Cal : verifyAvailability(roomId, dates)
+RBC --> Room : reserve(roomId, dates)
+RBC --> Booking : create(studentId, roomId, dates)
+RBC --> RBUI : return booking confirmation
+
+RBUI --> Student : show confirmation
+
+@enduml

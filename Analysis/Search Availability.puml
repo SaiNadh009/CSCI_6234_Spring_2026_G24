@@ -1,0 +1,20 @@
+@startuml
+title sd robustness_diagram_search_available_room
+skinparam linetype ortho
+
+actor "Student" as Student
+
+boundary "Search Availability UI" as SAUI
+control "RoomSearchController" as RSC
+entity "Room" as Room
+entity "AvailabilityCalendar" as Cal
+
+Student --> SAUI : enter dates/criteria
+SAUI --> Student : display progress
+
+SAUI --> RSC : searchAvailableRooms(criteria)
+RSC --> Room : findMatchingRooms(criteria)
+RSC --> Cal : getAvailability(roomIds, dates)
+RSC --> SAUI : return available rooms + times
+SAUI --> Student : show available rooms list
+@enduml

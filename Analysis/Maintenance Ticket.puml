@@ -1,0 +1,27 @@
+@startuml
+title sd robustness_diagram_submit_maintenance_ticket
+skinparam linetype ortho
+
+actor "Student" as Student
+actor "Notification Service" as NS
+
+boundary "Maintenance Ticket UI" as MTUI
+boundary "Notification API" as NAPI
+control "MaintenanceTicketController" as MTC
+entity "MaintenanceTicket" as MT
+entity "StatusHistory" as SH
+
+Student --> MTUI : submit issue details
+MTUI --> Student : display progress
+
+MTUI --> MTC : createTicket(details)
+MTC --> MT : saveNewTicket(details)
+MTC --> SH : addInitialStatus(ticketId, "Submitted")
+MTC --> NAPI : publishTicketCreated(ticketId)
+
+NAPI --> NS : ticket created event
+MTC --> MTUI : return ticketId + current status
+
+MTUI --> Student : show ticket submitted
+
+@enduml

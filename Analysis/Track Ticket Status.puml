@@ -1,0 +1,26 @@
+@startuml
+title Robustness Diagram — Track Ticket Status
+skinparam linetype ortho
+
+actor "Student" as Student
+actor "Notification Service" as NS
+
+boundary "<<boundary>>\nTicket Status UI" as TSUI
+boundary "<<boundary>>\nNotification API" as NAPI
+
+control "<<control>>\nTicketStatusController" as TSC
+
+entity "<<entity>>\nMaintenanceTicket" as MT
+entity "<<entity>>\nStatusHistory" as SH
+
+Student --> TSUI : enter ticket ID
+TSUI --> Student : display progress
+
+TSUI --> TSC : getStatus(ticketId)
+TSC --> MT : retrieve current status
+TSC --> SH : load history/updates
+TSC --> TSUI : return status + history
+
+NS --> NAPI : status update event
+NAPI --> TSC : notifyChange(ticketId)
+@enduml

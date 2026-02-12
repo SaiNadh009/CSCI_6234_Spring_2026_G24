@@ -1,0 +1,24 @@
+@startuml
+title sd robustness_diagram_br_check_in
+skinparam linetype ortho
+
+actor "Student" as Student
+
+boundary "Check-in UI" as CIUI
+control "CheckInController" as CIC
+entity "Booking" as Booking
+entity "Room" as Room
+entity "CheckInLog" as Log
+
+Student --> CIUI : request check-in
+CIUI --> Student : display progress
+
+CIUI --> CIC : checkIn(bookingId)
+CIC --> Booking : validateActiveBooking(bookingId)
+CIC --> Room : markOccupied(roomId)
+CIC --> Log : recordCheckIn(studentId, roomId, time)
+CIC --> CIUI : return check-in status
+
+CIUI --> Student : show check-in confirmation
+
+@enduml
