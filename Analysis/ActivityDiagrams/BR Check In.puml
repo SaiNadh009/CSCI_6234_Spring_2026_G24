@@ -1,0 +1,57 @@
+@startuml
+title BR Check-In - Activity Diagram
+
+start
+
+:Request Check-In;
+note right
+Student initiates check-in from the Check-in UI.
+end note
+
+:Display Progress;
+note right
+System shows check-in progress or processing status to the student.
+end note
+
+:Send Check-In Request;
+note right
+Check-in UI sends checkIn(bookingId) to CheckInController.
+end note
+
+:Validate Active Booking;
+note right
+CheckInController verifies whether the booking is active using Booking.
+end note
+
+if (Booking Active?) then (Yes)
+  :Mark Room Occupied;
+  note right
+  System updates the Room status to occupied.
+  end note
+
+  :Record Check-In Log;
+  note right
+  System records check-in details
+  (studentId, roomId, time) in CheckInLog.
+  end note
+
+  :Return Check-In Status (Success);
+  note right
+  CheckInController returns successful check-in status
+  to the Check-in UI.
+  end note
+else (No)
+  :Return Check-In Status (Failure);
+  note right
+  System returns failed check-in status for invalid
+  or inactive booking.
+  end note
+endif
+
+:Show Check-In Confirmation;
+note right
+Check-in UI displays confirmation or an error message to the student.
+end note
+
+stop
+@enduml

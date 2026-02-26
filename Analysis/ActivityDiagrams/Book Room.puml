@@ -1,0 +1,60 @@
+@startuml
+title Book Room - Activity Diagram
+
+start
+
+:Start Booking;
+note right
+Student initiates the room booking process from the Room Booking UI.
+end note
+
+:Display Progress;
+note right
+System shows booking progress or processing status to the student.
+end note
+
+:Send Booking Request;
+note right
+Room Booking UI sends bookRoom(requestDetails)
+to RoomBookingController.
+end note
+
+:Verify Availability;
+note right
+RoomBookingController checks room availability using
+AvailabilityCalendar (roomId, dates).
+end note
+
+if (Room Available?) then (Yes)
+  :Reserve Room;
+  note right
+  System reserves the room for the selected dates.
+  end note
+
+  :Create Booking Record;
+  note right
+  System creates a booking record with studentId,
+  roomId, and dates.
+  end note
+
+  :Return Booking Confirmation (Success);
+  note right
+  RoomBookingController returns successful booking confirmation
+  to the Room Booking UI.
+  end note
+else (No)
+  :Return Booking Status (Failure);
+  note right
+  System returns booking failure for unavailable room
+  or date conflict.
+  end note
+endif
+
+:Show Confirmation;
+note right
+Room Booking UI displays confirmation or an error message
+to the student.
+end note
+
+stop
+@enduml

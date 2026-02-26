@@ -1,0 +1,63 @@
+@startuml
+title Maintenance Ticket - Activity Diagram
+
+start
+
+:Submit Issue Details;
+note right
+Student enters and submits maintenance issue details
+from the Maintenance Ticket UI.
+end note
+
+:Display Progress;
+note right
+System shows ticket submission progress or processing status
+to the student.
+end note
+
+:Create Ticket Request;
+note right
+Maintenance Ticket UI sends createTicket(details)
+to the MaintenanceTicketController (via Notification API).
+end note
+
+if (Ticket Data Valid?) then (Yes)
+  :Save New Ticket;
+  note right
+  MaintenanceTicketController saves the new ticket details
+  in MaintenanceTicket.
+  end note
+
+  :Add Initial Status;
+  note right
+  System adds initial status entry "Submitted"
+  in StatusHistory for the created ticket.
+  end note
+
+  :Publish Ticket Created Event;
+  note right
+  MaintenanceTicketController publishes ticketCreated(ticketId)
+  through the Notification API / Notification Service.
+  end note
+
+  :Return Ticket ID + Status;
+  note right
+  System returns ticketId and current status back
+  to the Maintenance Ticket UI.
+  end note
+else (No)
+  :Return Submission Status (Failure);
+  note right
+  System returns failure if ticket details are invalid
+  or cannot be processed.
+  end note
+endif
+
+:Show Ticket Submitted;
+note right
+Maintenance Ticket UI displays submission confirmation
+to the student.
+end note
+
+stop
+@enduml

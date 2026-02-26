@@ -1,0 +1,48 @@
+@startuml
+title Search Availability - Activity Diagram
+
+start
+
+:Enter Dates / Criteria;
+note right
+Student enters search dates and room criteria
+in the Search Availability UI.
+end note
+
+:Display Progress;
+note right
+System shows search progress or processing status to the student.
+end note
+
+:Send Search Request;
+note right
+Search Availability UI sends searchAvailableRooms(criteria)
+to RoomSearchController.
+end note
+
+:Find Matching Rooms;
+note right
+RoomSearchController finds rooms matching the requested
+criteria using Room data.
+end note
+
+:Get Availability;
+note right
+RoomSearchController retrieves availability for matching roomIds
+and dates from AvailabilityCalendar.
+end note
+
+:Return Available Rooms + Times;
+note right
+System returns the list of available rooms and available
+time/date slots to the UI.
+end note
+
+:Show Available Rooms List;
+note right
+Search Availability UI displays the available rooms list
+to the student.
+end note
+
+stop
+@enduml

@@ -1,0 +1,57 @@
+@startuml
+title Track Ticket Status - Activity Diagram
+
+start
+
+:Enter Ticket ID;
+note right
+Student enters the ticket ID in the Ticket Status UI.
+end note
+
+:Display Progress;
+note right
+System shows ticket status lookup progress or processing status
+to the student.
+end note
+
+:Send Status Request;
+note right
+Ticket Status UI sends getStatus(ticketId)
+to TicketStatusController.
+end note
+
+:Retrieve Current Status;
+note right
+TicketStatusController retrieves the current status
+from MaintenanceTicket.
+end note
+
+:Load Status History / Updates;
+note right
+TicketStatusController loads status history and updates
+from StatusHistory.
+end note
+
+:Return Status + History;
+note right
+System returns the current ticket status and status history
+to the Ticket Status UI.
+end note
+
+if (New Status Update Event Received?) then (Yes)
+  :Process Notification Event;
+  note right
+  Notification API / service forwards a status update event
+  and the controller refreshes the latest ticket status.
+  end note
+else (No)
+endif
+
+:Show Ticket Status;
+note right
+Ticket Status UI displays the current status and history timeline
+to the student.
+end note
+
+stop
+@enduml
