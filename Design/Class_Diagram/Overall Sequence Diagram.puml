@@ -1,0 +1,141 @@
+@startuml
+skinparam classAttributeIconSize 0
+title Student Accommodation Management - Simple Class Diagram
+
+'====================
+' UI (Boundary)
+'====================
+class "Room Booking UI" as RoomBookingUI <<boundary>> {
+  +startBooking()
+  +showConfirmation()
+}
+
+class "Search Availability UI" as SearchUI <<boundary>> {
+  +enterCriteria()
+  +showAvailableRooms()
+}
+
+class "Check-in UI" as CheckInUI <<boundary>> {
+  +requestCheckIn()
+  +showCheckInConfirmation()
+}
+
+class "Maintenance Ticket UI" as TicketUI <<boundary>> {
+  +submitIssue()
+  +showTicketSubmitted()
+}
+
+class "Ticket Status UI" as TicketStatusUI <<boundary>> {
+  +enterTicketId()
+  +showStatus()
+}
+
+'====================
+' Controllers
+'====================
+class RoomBookingController <<control>> {
+  +bookRoom(details)
+}
+
+class RoomSearchController <<control>> {
+  +searchAvailableRooms(criteria)
+}
+
+class CheckInController <<control>> {
+  +checkIn(bookingId)
+}
+
+class MaintenanceTicketController <<control>> {
+  +createTicket(details)
+}
+
+class TicketStatusController <<control>> {
+  +getStatus(ticketId)
+}
+
+'====================
+' Entities
+'====================
+class Student <<entity>> {
+  +studentId : int
+  +name : string
+  +email : string
+}
+
+class Room <<entity>> {
+  +roomId : int
+  +roomNumber : string
+  +status : string
+}
+
+class Booking <<entity>> {
+  +bookingId : int
+  +startDate : string
+  +endDate : string
+  +status : string
+}
+
+class AvailabilityCalendar <<entity>> {
+  +calendarId : int
+}
+
+class CheckInLog <<entity>> {
+  +checkInLogId : int
+  +checkInTime : string
+}
+
+class MaintenanceTicket <<entity>> {
+  +ticketId : int
+  +description : string
+  +currentStatus : string
+}
+
+class StatusHistory <<entity>> {
+  +historyId : int
+  +status : string
+  +updatedAt : string
+}
+
+class "Notification Service" as NotificationService <<entity>>
+
+'====================
+' UI -> Controller
+'====================
+RoomBookingUI --> RoomBookingController
+SearchUI --> RoomSearchController
+CheckInUI --> CheckInController
+TicketUI --> MaintenanceTicketController
+TicketStatusUI --> TicketStatusController
+
+'====================
+' Controller -> Entity
+'====================
+RoomBookingController --> Room
+RoomBookingController --> Booking
+RoomBookingController --> AvailabilityCalendar
+
+RoomSearchController --> Room
+RoomSearchController --> AvailabilityCalendar
+
+CheckInController --> Booking
+CheckInController --> Room
+CheckInController --> CheckInLog
+
+MaintenanceTicketController --> MaintenanceTicket
+MaintenanceTicketController --> StatusHistory
+MaintenanceTicketController --> NotificationService
+
+TicketStatusController --> MaintenanceTicket
+TicketStatusController --> StatusHistory
+
+'====================
+' Main Relationships
+'====================
+Student "1" -- "0..*" Booking : makes
+Booking "*" -- "1" Room : for
+Room "1" -- "1" AvailabilityCalendar : has
+
+Student "1" -- "0..*" MaintenanceTicket : raises
+MaintenanceTicket "1" -- "1..*" StatusHistory : has
+Booking "1" -- "0..1" CheckInLog : check-in record
+@enduml
