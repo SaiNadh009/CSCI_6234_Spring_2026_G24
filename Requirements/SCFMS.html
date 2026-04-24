@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCFMS — Smart Campus Facility Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: #060b18;
+      color: #e8edf5;
+      overflow: hidden;
+    }
+    input, textarea, select, button { font-family: inherit; }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: rgba(77,166,255,.5) !important;
+    }
+    select option { background: #0e1730; color: #fff; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 8px; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleUp { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: scale(1); } }
+    @keyframes slideRight { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes toastSlide { from { opacity: 0; transform: translateX(80px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+    @keyframes glow { 0%,100% { opacity: .25; } 50% { opacity: .55; } }
+    @keyframes drift {
+      0%   { transform: translate(0,0); opacity: 0; }
+      10%  { opacity: .4; }
+      90%  { opacity: .4; }
+      100% { transform: translate(var(--tx),var(--ty)); opacity: 0; }
+    }
+
+    .app-shell {
+      display: flex;
+      height: 100vh;
+      background: radial-gradient(ellipse at 20% 50%, rgba(77,166,255,.025), transparent 50%), radial-gradient(ellipse at 80% 50%, rgba(34,201,136,.015), transparent 50%), #060b18;
+    }
+    .login-shell {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 30% 20%, rgba(77,166,255,.05), transparent 55%), radial-gradient(ellipse at 70% 80%, rgba(34,201,136,.04), transparent 55%), #060b18;
+      position: relative;
+      overflow: hidden;
+    }
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0;
+      animation: drift var(--dur) var(--delay) infinite linear;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: glow 7s infinite;
+    }
+    .card {
+      background: rgba(12,20,42,.65);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.06);
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .input-base {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #fff;
+      font-size: 14px;
+      transition: border .25s, background .25s;
+    }
+    .label-base {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn-primary {
+      padding: 12px 26px;
+      border-radius: 11px;
+      border: none;
+      background: linear-gradient(135deg, #4da6ff, #22c988);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: transform .25s, box-shadow .25s, opacity .25s;
+      box-shadow: 0 6px 24px rgba(77,166,255,.18);
+    }
+    .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 32px rgba(77,166,255,.28); }
+    .btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.03);
+      color: rgba(255,255,255,.6);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.06); transform: translateY(-1px); }
+    .btn-secondary.danger { border-color: rgba(255,92,92,.25); color: #ff5c5c; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 11px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      backdrop-filter: blur(16px);
+      border-radius: 14px;
+      padding: 14px 22px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 380px;
+      animation: toastSlide .4s ease;
+    }
+    .toast-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar {
+      width: 248px;
+      flex-shrink: 0;
+      transition: width .3s cubic-bezier(.23,1,.32,1);
+      background: rgba(8,14,30,.8);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid rgba(255,255,255,.05);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 10;
+    }
+    .sidebar.collapsed { width: 66px; }
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 100vh;
+      position: relative;
+      z-index: 5;
+    }
+    .main-inner {
+      padding: 34px 38px;
+      max-width: 920px;
+      animation: fadeUp .4s ease;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 10px 13px;
+      border-radius: 9px;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: rgba(255,255,255,.4);
+      font-size: 13px;
+      margin-bottom: 2px;
+      transition: all .2s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar.collapsed .nav-btn {
+      justify-content: center;
+      padding: 10px 0;
+    }
+    .nav-btn:hover { background: rgba(77,166,255,.05); transform: translateX(3px); }
+    .nav-btn.active {
+      background: rgba(77,166,255,.1);
+      color: #fff;
+      font-weight: 700;
+      border-left-color: #4da6ff;
+    }
+    .nav-btn.active:hover { transform: none; }
+    .hidden-when-collapsed { display: block; }
+    .sidebar.collapsed .hidden-when-collapsed { display: none !important; }
+    .grid-auto {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+      gap: 16px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 14px;
+      margin: 26px 0 34px;
+    }
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+    .search-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .room-card {
+      padding: 0;
+      overflow: hidden;
+      transition: transform .35s ease, box-shadow .35s ease, border-color .3s;
+      transform-style: preserve-3d;
+      animation: scaleUp .5s ease both;
+    }
+    .room-card:hover { box-shadow: 0 16px 50px rgba(0,0,0,.3); }
+    .room-card.selectable { cursor: pointer; }
+    .room-image-wrap {
+      height: 140px;
+      position: relative;
+      overflow: hidden;
+    }
+    .room-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .6s ease, opacity .5s;
+    }
+    .room-card:hover .room-image { transform: scale(1.08); }
+    .booking-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 12px;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+      animation: slideRight .45s ease both;
+    }
+    .booking-card:hover {
+      transform: translateX(4px);
+      border-color: rgba(77,166,255,.15);
+      box-shadow: 0 8px 30px rgba(0,0,0,.2);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 56px 24px;
+      animation: scaleUp .4s ease both;
+    }
+    .section-header { margin-bottom: 26px; animation: fadeUp .5s ease both; }
+    .section-subtitle { color: rgba(255,255,255,.4); font-size: 14px; margin-left: 58px; }
+    .step-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .login-card {
+      width: 440px;
+      padding: 46px 40px;
+      border-radius: 24px;
+      background: rgba(12,20,42,.7);
+      backdrop-filter: blur(28px);
+      border: 1px solid rgba(255,255,255,.06);
+      box-shadow: 0 32px 100px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+      animation: fadeUp .6s ease;
+      position: relative;
+      z-index: 10;
+    }
+    .demo-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .demo-item:hover { background: rgba(77,166,255,.06); transform: translateX(4px); }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .muted { color: rgba(255,255,255,.4); }
+    .muted-soft { color: rgba(255,255,255,.2); }
+
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; height: 100vh; }
+      .main { margin-left: 66px; }
+      .main-inner { padding: 24px 18px; }
+      .search-form, .grid-2 { grid-template-columns: 1fr !important; }
+      .login-card { width: min(92vw, 440px); padding: 34px 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    const STUDENTS = [
+      { id: 1, name: "Sasi Sai Nadh Boddu", email: "sasi@gwu.edu", username: "sasi", password: "password123" },
+      { id: 2, name: "Nikhil", email: "nik@gwu.edu", username: "nikhil", password: "pass456" },
+      { id: 3, name: "Alice", email: "alice@gwu.edu", username: "alice", password: "alice789" },
+    ];
+
+    const ROOMS_INIT = [
+      { id: 101, num: "B101", cap: 30, bld: "Science Building", status: "Available", icon: "🔬", img: "https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=260&fit=crop&q=80" },
+      { id: 102, num: "B102", cap: 50, bld: "Science Building", status: "Available", icon: "🧪", img: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400&h=260&fit=crop&q=80" },
+      { id: 201, num: "L201", cap: 20, bld: "Library", status: "Available", icon: "📚", img: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&h=260&fit=crop&q=80" },
+      { id: 202, num: "L202", cap: 40, bld: "Library", status: "Available", icon: "📖", img: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=400&h=260&fit=crop&q=80" },
+      { id: 301, num: "E301", cap: 60, bld: "Engineering Hall", status: "Available", icon: "⚙️", img: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=260&fit=crop&q=80" },
+      { id: 302, num: "E302", cap: 25, bld: "Engineering Hall", status: "Available", icon: "🔩", img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&h=260&fit=crop&q=80" },
+      { id: 401, num: "A401", cap: 100, bld: "Auditorium", status: "Available", icon: "🎭", img: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=260&fit=crop&q=80" },
+      { id: 501, num: "C501", cap: 15, bld: "Computer Lab", status: "Available", icon: "💻", img: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=260&fit=crop&q=80" },
+    ];
+
+    const STATUS_COLORS = {
+      Confirmed: "#4da6ff", "Checked-In": "#22c988", Cancelled: "#ff5c5c",
+      Open: "#ffb347", "In Progress": "#4da6ff", Resolved: "#22c988",
+      Closed: "#888", Available: "#22c988", Occupied: "#ffb347",
+      Pending: "#4da6ff",
+      Completed: "#9b8cff",
+    };
+
+    const state = {
+      user: null,
+      unInput: "",
+      pwInput: "",
+      showPw: false,
+      loginErr: "",
+      tab: "dashboard",
+      rooms: structuredClone(ROOMS_INIT),
+      bookings: [],
+      tickets: [],
+      notifs: [],
+      toast: null,
+      sidebar: true,
+      reservations: {},
+      sDate: "",
+      sStart: "",
+      sEnd: "",
+      sCap: "",
+      sResults: null,
+      bDate: "",
+      bStart: "",
+      bEnd: "",
+      bCap: "",
+      bResults: null,
+      selRoomId: null,
+      tRoomId: "",
+      tDesc: "",
+      viewTicketId: null,
+      bkId: 0,
+      tkId: 0,
+      ciId: 0,
+      coId: 0,
+    };
+
+    const app = document.getElementById('app');
+
+    function getStatusColor(s) { return STATUS_COLORS[s] || '#999'; }
+
+    function setState(patch) {
+      Object.assign(state, patch);
+      render();
+    }
+
+    function navigate(tab) {
+      state.tab = tab;
+      state.viewTicketId = null;
+      render();
+    }
+
+    function flash(msg, type = 'success') {
+      state.toast = { msg, type };
+      render();
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        state.toast = null;
+        render();
+      }, 3800);
+    }
+
+    function notify(msg) {
+      state.notifs.unshift({ msg, time: new Date().toLocaleTimeString() });
+      state.notifs = state.notifs.slice(0, 40);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function badge(status) {
+      const c = getStatusColor(status);
+      return `
+        <span class="badge" style="background:${c}18;color:${c};border:1px solid ${c}30;">
+          <span class="badge-dot" style="background:${c};box-shadow:0 0 6px ${c};"></span>
+          ${escapeHtml(status)}
+        </span>`;
+    }
+
+    function particlesHtml() {
+      let html = '<div class="particles">';
+      for (let i = 0; i < 24; i++) {
+        const left = Math.random() * 100;
+        const top = Math.random() * 100;
+        const size = 1 + Math.random() * 2.5;
+        const dur = 18 + Math.random() * 18;
+        const del = Math.random() * 12;
+        const tx = (Math.random() - .5) * 180;
+        const ty = (Math.random() - .5) * 180;
+        const color = ["#4da6ff", "#22c988", "#ffb347"][i % 3];
+        html += `<div class="particle" style="left:${left}%;top:${top}%;width:${size}px;height:${size}px;background:${color};--dur:${dur}s;--delay:${del}s;--tx:${tx}px;--ty:${ty}px;"></div>`;
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function filterRooms(date, start, end, people) {
+      const count = people ? parseInt(people, 10) : 0;
+      return state.rooms.filter(r => {
+        if (r.status === 'Under Maintenance') return false;
+        // Must fit the group
+        if (r.cap < count) return false;
+        // Smart upper bound: don't show a 100-seat auditorium for 3 people
+        // Upper bound = people * 3 (but at least 10 so small groups still see options)
+        if (count > 0) {
+          const upperBound = Math.max(count * 3, 10);
+          if (r.cap > upperBound) return false;
+        }
+        return !state.reservations[`${r.id}-${date}-${start}-${end}`];
+      });
+    }
+
+    // Returns ALL rooms fitting capacity with their available slots on the date.
+    // Used when the searched slot returns 0 results.
+    function getUnavailableWithSlots(date, start, end, people) {
+      const count = people ? parseInt(people, 10) : 0;
+      const upperBound = count > 0 ? Math.max(count * 3, 10) : Infinity;
+
+      // All rooms that fit the capacity range
+      let pool = state.rooms.filter(r => {
+        if (r.status === 'Under Maintenance') return false;
+        if (count > 0 && r.cap < count) return false;
+        if (count > 0 && r.cap > upperBound) return false;
+        return true;
+      });
+
+      // If nothing matches capacity filter, show all non-maintenance rooms
+      if (pool.length === 0) {
+        pool = state.rooms.filter(r => r.status !== 'Under Maintenance');
+      }
+
+      // For each room, determine if it is booked for the searched slot and find free slots
+      return pool.map(r => {
+        const isBookedForSlot = !!state.reservations[`${r.id}-${date}-${start}-${end}`];
+        const slots = [];
+        for (let h = 7; h <= 21; h++) {
+          for (let m = 0; m < 60; m += 30) {
+            const sh = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+            const eh = String(h + 1).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+            if (sh === start) continue; // skip the already-searched slot
+            if (!state.reservations[`${r.id}-${date}-${sh}-${eh}`]) {
+              slots.push({ start: sh, end: eh });
+            }
+          }
+        }
+        return { room: r, isBookedForSlot, slots: slots.slice(0, 8) };
+      });
+    }
+
+    function fmtTime(t) {
+      const [hh, mm] = t.split(':');
+      const h = parseInt(hh, 10);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
+      return `${h12}:${mm} ${ampm}`;
+    }
+
+    function unavailableRoomsPanel(date, start, end, people, prefix) {
+      const items = getUnavailableWithSlots(date, start, end, people);
+      if (items.length === 0) return '';
+      const peopleLabel = people ? `${people} ${parseInt(people)===1?'person':'people'}` : 'your group';
+      return `
+        <div style="margin-top:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <div style="width:3px;height:28px;background:linear-gradient(135deg,#4da6ff,#22c988);border-radius:2px;"></div>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:rgba(255,255,255,.85);">&#128337; Next Available Times for ${peopleLabel}</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.35);margin-top:2px;">Rooms that fit your group — click any green time slot to instantly search that window.</div>
+            </div>
+          </div>
+          ${items.map(({ room, isBookedForSlot, slots }) => `
+            <div class="card" style="margin-bottom:14px;border-color:rgba(77,166,255,.1);background:rgba(77,166,255,.02);">
+              <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+                <div style="width:70px;height:50px;border-radius:9px;overflow:hidden;flex-shrink:0;">
+                  <img src="${room.img}" alt="" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div style="flex:1;min-width:180px;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+                    <span style="font-size:16px;">${room.icon}</span>
+                    <span style="font-weight:800;font-size:14px;">Room ${room.num}</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,.3);">${room.bld}</span>
+                    ${isBookedForSlot
+                      ? '<span style="font-size:11px;background:rgba(255,92,92,.12);color:#ff7a7a;border:1px solid rgba(255,92,92,.2);border-radius:6px;padding:1px 8px;font-weight:700;">Booked ${fmtTime(start)}</span>'
+                      : '<span style="font-size:11px;background:rgba(34,201,136,.1);color:#22c988;border:1px solid rgba(34,201,136,.2);border-radius:6px;padding:1px 8px;font-weight:700;">Available</span>'}
+                  </div>
+                  <div style="font-size:12px;color:rgba(255,255,255,.35);margin-bottom:10px;">&#128101; ${room.cap} seats &nbsp;&#183;&nbsp; fits ${peopleLabel}</div>
+                  ${slots.length === 0
+                    ? '<div style="font-size:12px;color:rgba(255,255,255,.25);font-style:italic;">No free slots remaining today.</div>'
+                    : `<div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Open slots on ${date}:</div>
+                       <div style="display:flex;flex-wrap:wrap;gap:7px;">
+                         ${slots.map(s => `
+                           <button
+                             data-action="prefill-slot"
+                             data-prefix="${prefix}"
+                             data-date="${date}"
+                             data-start="${s.start}"
+                             data-end="${s.end}"
+                             style="padding:6px 13px;border-radius:8px;border:1px solid rgba(34,201,136,.3);background:rgba(34,201,136,.07);color:#22c988;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;"
+                             onmouseover="this.style.background='rgba(34,201,136,.18)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 14px rgba(34,201,136,.2)'"
+                             onmouseout="this.style.background='rgba(34,201,136,.07)';this.style.transform='';this.style.boxShadow=''"
+                           >
+                             &#128337; ${fmtTime(s.start)}&nbsp;–&nbsp;${fmtTime(s.end)}
+                           </button>`).join('')}
+                       </div>`}
+                </div>
+              </div>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    function doLogin(e) {
+      e.preventDefault();
+      const found = STUDENTS.find(s => s.username === state.unInput && s.password === state.pwInput);
+      if (found) {
+        state.user = found;
+        state.loginErr = '';
+        state.unInput = '';
+        state.pwInput = '';
+        notify('Welcome back, ' + found.name + '!');
+        render();
+      } else {
+        state.loginErr = 'Invalid credentials. Please try again.';
+        render();
+      }
+    }
+
+    function doLogout() {
+      Object.assign(state, {
+        user: null, tab: 'dashboard', rooms: structuredClone(ROOMS_INIT), bookings: [], tickets: [], notifs: [],
+        reservations: {}, sResults: null, bResults: null, selRoomId: null, viewTicketId: null,
+        sDate: '', sStart: '', sEnd: '', sCap: '', bDate: '', bStart: '', bEnd: '', bCap: '',
+        tRoomId: '', tDesc: '', bkId: 0, tkId: 0, ciId: 0, coId: 0, loginErr: ''
+      });
+      render();
+    }
+
+    function doSearch(e) {
+      e.preventDefault();
+      const res = filterRooms(state.sDate, state.sStart, state.sEnd, state.sCap);
+      state.sResults = res;
+      notify('Found ' + res.length + ' room(s) for ' + state.sDate);
+      render();
+    }
+
+    function doBookSearch(e) {
+      e.preventDefault();
+      state.bResults = filterRooms(state.bDate, state.bStart, state.bEnd, state.bCap);
+      state.selRoomId = null;
+      render();
+    }
+
+    function doBookConfirm() {
+      const selRoom = state.bResults?.find(r => r.id === state.selRoomId);
+      if (!selRoom) return;
+      const key = `${selRoom.id}-${state.bDate}-${state.bStart}-${state.bEnd}`;
+      if (state.reservations[key]) { flash('Room no longer available.', 'error'); return; }
+      state.bkId++;
+      const bk = {
+        id: state.bkId,
+        student: state.user,
+        room: selRoom,
+        date: state.bDate,
+        startTime: state.bStart,
+        endTime: state.bEnd,
+        status: 'Confirmed',
+        checkIn: null,
+        checkOut: null,
+      };
+      state.bookings.push(bk);
+      state.reservations[key] = true;
+      notify('Booked Room ' + selRoom.num + ' on ' + state.bDate + ' ' + state.bStart + '-' + state.bEnd);
+      flash('Room ' + selRoom.num + ' booked!');
+      state.bResults = null;
+      state.selRoomId = null;
+      state.bDate = '';
+      state.bStart = '';
+      state.bEnd = '';
+      state.bCap = '';
+      state.tab = 'myBookings';
+      render();
+    }
+
+    function doCheckIn(bid) {
+      state.bookings = state.bookings.map(b => {
+        if (b.id === bid && b.status === 'Confirmed') {
+          state.ciId++;
+          const t = new Date().toLocaleString();
+          notify('Checked in to Room ' + b.room.num + '!');
+          flash('Checked in to ' + b.room.num + '!');
+          state.rooms = state.rooms.map(r => r.id === b.room.id ? { ...r, status: 'Occupied' } : r);
+          return { ...b, status: 'Checked-In', checkIn: { id: state.ciId, time: t } };
+        }
+        return b;
+      });
+      render();
+    }
+
+
+    function doCheckOut(bid) {
+      state.bookings = state.bookings.map(b => {
+        if (b.id === bid && b.status === 'Checked-In') {
+          state.coId++;
+          const t = new Date().toLocaleString();
+          const key = `${b.room.id}-${b.date}-${b.startTime}-${b.endTime}`;
+          delete state.reservations[key];
+          notify('Checked out of Room ' + b.room.num + '!');
+          flash('Checked out of ' + b.room.num + '!', 'info');
+          state.rooms = state.rooms.map(r => r.id === b.room.id ? { ...r, status: 'Available' } : r);
+          return { ...b, status: 'Completed', checkOut: { id: state.coId, time: t } };
+        }
+        return b;
+      });
+      render();
+    }
+
+    function doCancel(bid) {
+      state.bookings = state.bookings.map(b => {
+        if (b.id === bid && (b.status === 'Confirmed' || b.status === 'Pending')) {
+          const key = `${b.room.id}-${b.date}-${b.startTime}-${b.endTime}`;
+          delete state.reservations[key];
+          notify('Booking #' + bid + ' cancelled.');
+          flash('Booking #' + bid + ' cancelled.', 'info');
+          return { ...b, status: 'Cancelled' };
+        }
+        return b;
+      });
+      render();
+    }
+
+    function doSubmitTicket(e) {
+      e.preventDefault();
+      const room = state.rooms.find(r => r.id === parseInt(state.tRoomId, 10));
+      if (!room) { flash('Room not found.', 'error'); return; }
+      if (!state.tDesc.trim()) { flash('Description required.', 'error'); return; }
+      state.tkId++;
+      const now = new Date().toLocaleString();
+      const tk = {
+        id: state.tkId,
+        student: state.user,
+        room,
+        description: state.tDesc,
+        status: 'Open',
+        history: [{ status: 'Open', time: now }],
+      };
+      state.tickets.push(tk);
+      notify('Ticket #' + tk.id + ' submitted for Room ' + room.num);
+      flash('Ticket #' + tk.id + ' submitted!');
+      state.tRoomId = '';
+      state.tDesc = '';
+      render();
+    }
+
+    function updateTicketStatus(id, nextStatus) {
+      const now = new Date().toLocaleString();
+      state.tickets = state.tickets.map(t => t.id === id ? { ...t, status: nextStatus, history: [...t.history, { status: nextStatus, time: now }] } : t);
+      notify('Ticket #' + id + ' → ' + nextStatus);
+      flash(nextStatus === 'Resolved' ? 'Resolved!' : 'Updated!');
+      if (state.viewTicketId === id) render(); else render();
+    }
+
+    function roomCard(room, opts = {}) {
+      const selected = opts.selected;
+      const selectable = opts.selectable;
+      return `
+        <div class="card room-card ${selectable ? 'selectable' : ''}" data-room-id="${room.id}" style="border:${selected ? '1px solid rgba(77,166,255,.4)' : '1px solid rgba(255,255,255,.06)'};box-shadow:${selected ? '0 0 30px rgba(77,166,255,.1)' : 'none'};">
+          <div class="room-image-wrap">
+            <img class="room-image" src="${room.img}" alt="${escapeHtml(room.bld)}">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(6,11,24,.92) 0%, transparent 55%);"></div>
+            <div style="position:absolute;top:10px;right:10px;">${badge(room.status)}</div>
+            ${selectable ? `<div style="position:absolute;top:10px;left:10px;width:24px;height:24px;border-radius:50%;border:2px solid ${selected ? '#4da6ff' : 'rgba(255,255,255,.3)'};background:${selected ? '#4da6ff' : 'rgba(0,0,0,.35)'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;backdrop-filter:blur(6px);">${selected ? '✓' : ''}</div>` : ''}
+            <div style="position:absolute;bottom:12px;left:14px;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:22px;">${room.icon}</span>
+              <span style="font-size:17px;font-weight:800;">${room.num}</span>
+            </div>
+          </div>
+          <div style="padding:13px 16px;">
+            <div style="color:rgba(255,255,255,.45);font-size:13px;margin-bottom:6px;">${escapeHtml(room.bld)}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;color:rgba(255,255,255,.5);">&#128101; ${room.cap} seats</span>
+              <span class="mono" style="font-size:11px;color:rgba(255,255,255,.2);">ID:${room.id}</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function bookingCard(b) {
+      return `
+        <div class="card booking-card" style="opacity:${b.status === 'Cancelled' ? '.4' : '1'};">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:52px;height:52px;border-radius:12px;overflow:hidden;flex-shrink:0;">
+              <img src="${b.room.img}" alt="" style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;">
+                <span class="mono" style="font-size:11px;color:rgba(255,255,255,.2);background:rgba(255,255,255,.04);padding:2px 7px;border-radius:5px;">#${b.id}</span>
+                ${b.room.icon} Room ${b.room.num}
+              </div>
+              <div style="color:rgba(255,255,255,.4);font-size:13px;margin-top:2px;">${escapeHtml(b.room.bld)} · ${b.date} · ${b.startTime}–${b.endTime}</div>
+              ${b.checkIn ? `<div style="color:#22c988;font-size:12px;margin-top:3px;">✓ Checked in at ${escapeHtml(b.checkIn.time)}</div>` : ''}
+              ${b.checkOut ? `<div style="color:#9b8cff;font-size:12px;margin-top:3px;">↩ Checked out at ${escapeHtml(b.checkOut.time)}</div>` : ''}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            ${badge(b.status)}
+            ${(b.status === 'Confirmed' || b.status === 'Pending') ? `<button class="btn-secondary danger" data-action="cancel-booking" data-id="${b.id}">Cancel</button>` : ''}
+            ${b.status === 'Confirmed' ? `<button class="btn-primary" data-action="checkin-booking" data-id="${b.id}">Check In</button>` : ''}
+            ${b.status === 'Checked-In' ? `<button class="btn-primary" data-action="checkout-booking" data-id="${b.id}">Check Out</button>` : ''}
+          </div>
+        </div>`;
+    }
+
+    function sectionHeader(icon, title, subtitle) {
+      return `
+        <div class="section-header">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
+            <div style="width:44px;height:44px;border-radius:13px;background:rgba(77,166,255,.08);border:1px solid rgba(77,166,255,.12);display:flex;align-items:center;justify-content:center;font-size:21px;">${icon}</div>
+            <h2 style="font-size:26px;font-weight:900;letter-spacing:-.5px;">${title}</h2>
+          </div>
+          ${subtitle ? `<p class="section-subtitle">${subtitle}</p>` : ''}
+        </div>`;
+    }
+
+    function emptyState(icon, text, action, actionLabel) {
+      return `
+        <div class="card empty-state">
+          <div style="font-size:52px;margin-bottom:14px;animation:float 5s ease-in-out infinite;">${icon}</div>
+          <div style="font-size:15px;font-weight:600;color:rgba(255,255,255,.5);">${text}</div>
+          ${action ? `<div style="margin-top:20px;"><button class="btn-primary" data-action="nav" data-target="${action}">${actionLabel}</button></div>` : ''}
+        </div>`;
+    }
+
+    function searchForm(prefix, label) {
+      const capVal = state[prefix + 'Cap'];
+      const peopleOptions = Array.from({length: 30}, (_, i) => i + 1).map(n =>
+        `<option value="${n}" ${String(capVal) === String(n) ? 'selected' : ''}>${n} ${n === 1 ? 'person' : 'people'}</option>`
+      ).join('');
+      const capHint = capVal ? (() => {
+        const n = parseInt(capVal, 10);
+        const hi = Math.max(n * 3, 10);
+        return `<div style="margin-top:6px;font-size:11px;color:#4da6ff;opacity:.9;font-weight:600;">&#128161; Showing rooms with ${n}&ndash;${hi} seat capacity</div>`;
+      })() : '';
+      return `
+        <form class="search-form" data-form="${prefix}">
+          <div><label class="label-base">Date</label><input class="input-base" type="date" name="date" value="${state[prefix + 'Date']}" required></div>
+          <div>
+            <label class="label-base">Number of People</label>
+            <select class="input-base" name="cap" style="appearance:auto;">
+              <option value="">Any size</option>
+              ${peopleOptions}
+            </select>
+            ${capHint}
+          </div>
+          <div><label class="label-base">Start Time</label><input class="input-base" type="time" name="start" value="${state[prefix + 'Start']}" required></div>
+          <div><label class="label-base">End Time</label><input class="input-base" type="time" name="end" value="${state[prefix + 'End']}" required></div>
+          <div style="grid-column:1 / -1"><button class="btn-primary">${label} &rarr;</button></div>
+        </form>`;
+    }
+
+    function roomGrid(list, selectable, selectedId) {
+      return `<div class="grid-auto">${list.map(r => roomCard(r, { selectable, selected: selectedId === r.id })).join('')}</div>`;
+    }
+
+    function renderLogin() {
+      app.innerHTML = `
+        <div class="login-shell">
+          ${particlesHtml()}
+          <div class="orb" style="top:5%;left:10%;width:350px;height:350px;background:radial-gradient(circle, rgba(77,166,255,.06), transparent 70%);"></div>
+          <div class="orb" style="bottom:5%;right:10%;width:300px;height:300px;background:radial-gradient(circle, rgba(34,201,136,.05), transparent 70%);animation:glow 9s 3s infinite;"></div>
+          <div class="login-card">
+            <div style="text-align:center;margin-bottom:34px;">
+              <div style="width:72px;height:72px;border-radius:20px;margin:0 auto 16px;background:linear-gradient(135deg, #4da6ff, #22c988);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 12px 36px rgba(77,166,255,.22);animation:float 5s ease-in-out infinite;">🏛️</div>
+              <h1 style="font-size:30px;font-weight:900;letter-spacing:-1px;"><span style="background:linear-gradient(135deg,#4da6ff,#22c988);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">SCFMS</span></h1>
+              <p style="color:rgba(255,255,255,.4);font-size:12px;margin-top:5px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;">Smart Campus Facility Management</p>
+              <p style="color:rgba(255,255,255,.22);font-size:11px;margin-top:5px;">Group 24 · Sasi Sai Nadh Boddu</p>
+            </div>
+
+            <form id="loginForm">
+              <label class="label-base">Username</label>
+              <input class="input-base" id="usernameInput" value="${state.unInput}" placeholder="Enter username" style="margin-bottom:16px;">
+
+              <label class="label-base">Password</label>
+              <div style="position:relative;margin-bottom:10px;">
+                <input class="input-base" id="passwordInput" type="${state.showPw ? 'text' : 'password'}" value="${state.pwInput}" placeholder="Enter password" style="padding-right:46px;">
+                <button type="button" id="togglePw" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:16px;">${state.showPw ? '🙈' : '👁️'}</button>
+              </div>
+
+              ${state.loginErr ? `<div style="color:#ff5c5c;font-size:13px;margin-bottom:12px;animation:fadeUp .3s ease">✗ ${state.loginErr}</div>` : ''}
+              <button class="btn-primary" style="width:100%;">Sign In →</button>
+            </form>
+
+            <div style="margin-top:26px;padding:14px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);">
+              <p style="color:rgba(255,255,255,.2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Demo Credentials — click to fill</p>
+              ${STUDENTS.map(s => `
+                <div class="demo-item" data-action="fill-demo" data-username="${s.username}" data-password="${s.password}">
+                  <span class="mono" style="font-size:13px;color:rgba(255,255,255,.45);">${s.username}</span>
+                  <span class="mono" style="font-size:12px;color:rgba(255,255,255,.2);">${s.password}</span>
+                </div>`).join('')}
+            </div>
+          </div>
+          ${toastHtml()}
+        </div>`;
+    }
+
+    function toastHtml() {
+      if (!state.toast) return '';
+      const map = {
+        success: { c: '#22c988', icon: '✓' },
+        error: { c: '#ff5c5c', icon: '✗' },
+        info: { c: '#4da6ff', icon: 'ℹ' },
+      };
+      const cfg = map[state.toast.type] || map.info;
+      return `
+        <div class="toast" style="background:${cfg.c}18;border:1px solid ${cfg.c}30;box-shadow:0 12px 40px ${cfg.c}20;">
+          <span class="toast-icon" style="background:${cfg.c}25;">${cfg.icon}</span>
+          ${escapeHtml(state.toast.msg)}
+        </div>`;
+    }
+
+    function renderDashboard() {
+      const totalBk = state.bookings.length;
+      const activeBk = state.bookings.filter(b => b.status !== 'Cancelled' && b.status !== 'Completed').length;
+      const checkedBk = state.bookings.filter(b => b.status === 'Checked-In').length;
+      const openTk = state.tickets.filter(t => t.status === 'Open' || t.status === 'In Progress').length;
+      const stats = [
+        { label: 'Total Bookings', val: totalBk, icon: '📅', color: '#4da6ff' },
+        { label: 'Active', val: activeBk, icon: '✅', color: '#22c988' },
+        { label: 'Checked In', val: checkedBk, icon: '🏢', color: '#ffb347' },
+        { label: 'Open Tickets', val: openTk, icon: '🛠️', color: '#ff5c5c' },
+      ];
+      return `
+        <div>
+          <div style="animation:fadeUp .5s ease both;margin-bottom:8px;">
+            <h2 style="font-size:30px;font-weight:900;letter-spacing:-.5px;">Welcome, <span style="background:linear-gradient(135deg,#4da6ff,#22c988);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${escapeHtml(state.user.name.split(' ')[0])}</span></h2>
+            <p style="color:rgba(255,255,255,.4);font-size:14px;margin-top:4px;">Your campus facility overview</p>
+          </div>
+          <div class="stats-grid">
+            ${stats.map(s => `
+              <div class="card" style="border-left:3px solid ${s.color};background:linear-gradient(135deg, ${s.color}14, ${s.color}04);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <span style="font-size:28px;">${s.icon}</span>
+                  <span class="mono" style="font-size:36px;font-weight:900;color:${s.color};">${s.val}</span>
+                </div>
+                <span style="color:rgba(255,255,255,.4);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">${s.label}</span>
+              </div>`).join('')}
+          </div>
+          <p style="color:rgba(255,255,255,.2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;">Quick Actions</p>
+          <div class="action-grid">
+            ${[
+              { l: 'Search Rooms', i: '🔍', t: 'search' },
+              { l: 'Book a Room', i: '📅', t: 'book' },
+              { l: 'Submit Ticket', i: '🛠️', t: 'submitTicket' },
+              { l: 'My Bookings', i: '📋', t: 'myBookings' }
+            ].map(a => `
+              <button class="card" data-action="nav" data-target="${a.t}" style="cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:#fff;">
+                <div style="width:42px;height:42px;border-radius:11px;background:rgba(77,166,255,.07);display:flex;align-items:center;justify-content:center;font-size:19px;">${a.i}</div>
+                ${a.l}
+              </button>`).join('')}
+          </div>
+          ${state.notifs.length > 0 ? `
+            <div>
+              <p style="color:rgba(255,255,255,.2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;">Recent Activity</p>
+              <div class="card" style="max-height:240px;overflow-y:auto;">
+                ${state.notifs.slice(0,8).map((n, i) => `
+                  <div style="padding:11px 14px;border-radius:8px;margin-bottom:4px;border-left:3px solid #4da6ff;font-size:13px;color:rgba(255,255,255,.55);background:${i === 0 ? 'rgba(77,166,255,.04)' : 'transparent'};">
+                    <span class="mono" style="font-size:10px;color:rgba(255,255,255,.2);margin-right:8px;">${n.time}</span>${escapeHtml(n.msg)}
+                  </div>`).join('')}
+              </div>
+            </div>` : ''}
+        </div>`;
+    }
+
+    function renderSearch() {
+      const noResults = state.sResults !== null && state.sResults.length === 0;
+      return `
+        <div>
+          ${sectionHeader('🔍', 'Search Rooms', 'Find available rooms for your desired date and time.')}
+          <div class="card" style="margin-bottom:24px;">${searchForm('s', 'Search Rooms')}</div>
+          ${state.sResults !== null ? `
+            <div>
+            <p style="color:rgba(255,255,255,.5);font-size:14px;font-weight:600;margin-bottom:14px;">${state.sResults.length} Room${state.sResults.length !== 1 ? 's' : ''} Found${state.sCap ? ` for ${state.sCap} ${parseInt(state.sCap)===1?'person':'people'}` : ''}</p>
+              ${noResults
+                ? `<div class="card" style="text-align:center;padding:32px 24px;">
+                    <div style="font-size:42px;margin-bottom:10px;animation:float 5s ease-in-out infinite;">🏚️</div>
+                    <div style="font-size:15px;font-weight:600;color:rgba(255,255,255,.5);">No rooms available for ${state.sCap ? `${state.sCap} ${parseInt(state.sCap)===1?'person':'people'}` : 'this criteria'} at ${state.sStart ? fmtTime(state.sStart) : 'this time'}.</div>
+                    <div style="font-size:13px;color:rgba(255,255,255,.3);margin-top:6px;">Check below for the next available times.</div>
+                  </div>
+                  ${unavailableRoomsPanel(state.sDate, state.sStart, state.sEnd, state.sCap, 's')}`
+                : roomGrid(state.sResults, false)}
+            </div>` : ''}
+        </div>`;
+    }
+
+    function renderBook() {
+      const selRoom = state.bResults?.find(r => r.id === state.selRoomId);
+      return `
+        <div>
+          ${sectionHeader('📅', 'Book a Room', 'Search, select, and confirm your booking.')}
+          <div class="card" style="margin-bottom:20px;">
+            <div class="step-row"><div class="step-circle" style="background:${state.bResults ? 'rgba(34,201,136,.15)' : 'linear-gradient(135deg, #4da6ff, #22c988)'};color:${state.bResults ? '#22c988' : '#fff'};">${state.bResults ? '✓' : '1'}</div><span style="font-weight:700;font-size:16px;">Select Date & Time</span></div>
+            ${searchForm('b', 'Find Rooms')}
+          </div>
+          ${state.bResults !== null ? `
+            <div style="margin-bottom:20px;">
+              <div class="step-row"><div class="step-circle" style="background:${selRoom ? 'rgba(34,201,136,.15)' : 'linear-gradient(135deg, #4da6ff, #22c988)'};color:${selRoom ? '#22c988' : '#fff'};">${selRoom ? '✓' : '2'}</div><span style="font-weight:700;font-size:16px;">Select a Room</span></div>
+              ${state.bResults.length === 0
+                ? `<div class="card" style="text-align:center;padding:32px 24px;">
+                    <div style="font-size:42px;margin-bottom:10px;animation:float 5s ease-in-out infinite;">🏚️</div>
+                    <div style="font-size:15px;font-weight:600;color:rgba(255,255,255,.5);">No rooms available for ${state.bCap ? `${state.bCap} ${parseInt(state.bCap)===1?'person':'people'}` : 'this criteria'} at ${state.bStart ? fmtTime(state.bStart) : 'this time'}.</div>
+                    <div style="font-size:13px;color:rgba(255,255,255,.3);margin-top:6px;">Check below for the next available times — click a slot to auto-fill.</div>
+                  </div>
+                  ${unavailableRoomsPanel(state.bDate, state.bStart, state.bEnd, state.bCap, 'b')}`
+                : roomGrid(state.bResults, true, state.selRoomId)}
+            </div>` : ''}
+          ${selRoom ? `
+            <div class="card" style="border-color:rgba(77,166,255,.15);box-shadow:0 0 40px rgba(77,166,255,.06);">
+              <div class="step-row"><div class="step-circle" style="background:linear-gradient(135deg, #4da6ff, #22c988);color:#fff;">3</div><span style="font-weight:700;font-size:16px;">Confirm Booking</span></div>
+              <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;">
+                ${[
+                  { l: 'Room', v: selRoom.icon + ' ' + selRoom.num + ' — ' + selRoom.bld },
+                  { l: 'Capacity', v: selRoom.cap + ' seats' },
+                  { l: 'Date', v: state.bDate },
+                  { l: 'Time', v: state.bStart + ' — ' + state.bEnd },
+                ].map(d => `<div><span style="color:rgba(255,255,255,.2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">${d.l}</span><div style="font-weight:700;font-size:15px;margin-top:4px;">${escapeHtml(d.v)}</div></div>`).join('')}
+              </div>
+              <button class="btn-primary" data-action="confirm-booking" style="width:100%;">Confirm Booking →</button>
+            </div>` : ''}
+        </div>`;
+    }
+
+    function renderCheckin() {
+      const confirmed = state.bookings.filter(b => b.status === 'Confirmed');
+      return `
+        <div>
+          ${sectionHeader('✅', 'Room Check-In', 'Check in to your confirmed bookings.')}
+          ${confirmed.length === 0 ? emptyState('📭', 'No confirmed bookings to check in.', 'book', 'Book a Room →') : confirmed.map(bookingCard).join('')}
+        </div>`;
+    }
+
+    function renderMyBookings() {
+      return `
+        <div>
+          ${sectionHeader('📋', 'My Bookings', 'View and manage all your room bookings.')}
+          ${state.bookings.length === 0 ? emptyState('📭', 'No bookings yet.', 'book', 'Book a Room →') : state.bookings.map(bookingCard).join('')}
+        </div>`;
+    }
+
+    function renderSubmitTicket() {
+      return `
+        <div>
+          ${sectionHeader('🛠️', 'Submit Ticket', 'Report a maintenance issue with a campus room.')}
+          <div class="card" style="max-width:560px;">
+            <form id="ticketForm">
+              <label class="label-base">Room</label>
+              <select class="input-base" id="ticketRoom" required style="margin-bottom:18px;appearance:auto;">
+                <option value="">Select a room...</option>
+                ${state.rooms.map(r => `<option value="${r.id}" ${String(state.tRoomId) === String(r.id) ? 'selected' : ''}>${r.icon} ${r.num} — ${r.bld}</option>`).join('')}
+              </select>
+              <label class="label-base">Issue Description</label>
+              <textarea class="input-base" id="ticketDesc" required rows="5" placeholder="Describe the issue in detail..." style="resize:vertical;margin-bottom:22px;">${escapeHtml(state.tDesc)}</textarea>
+              <button class="btn-primary">Submit Ticket →</button>
+            </form>
+          </div>
+        </div>`;
+    }
+
+    function renderTrackTickets() {
+      if (state.viewTicketId) {
+        const t = state.tickets.find(x => x.id === state.viewTicketId);
+        if (!t) { state.viewTicketId = null; return renderTrackTickets(); }
+        return `
+          <div>
+            <button class="btn-secondary" data-action="close-ticket-view">← Back</button>
+            <div style="margin-top:20px;">${sectionHeader('📡', 'Ticket #' + t.id, 'Room ' + t.room.num + ' — ' + t.room.bld)}</div>
+            <div class="card">
+              <div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+                <div style="width:130px;height:85px;border-radius:12px;overflow:hidden;flex-shrink:0;">
+                  <img src="${t.room.img}" alt="" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div>
+                  <div style="margin-bottom:8px;">${badge(t.status)}</div>
+                  <div style="color:rgba(255,255,255,.5);font-size:14px;line-height:1.6;">${escapeHtml(t.description)}</div>
+                </div>
+              </div>
+              <p style="color:rgba(255,255,255,.2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;">Status Timeline</p>
+              <div style="position:relative;padding-left:28px;">
+                <div style="position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:rgba(255,255,255,.05);"></div>
+                ${t.history.map((h, i) => {
+                  const isLast = i === t.history.length - 1;
+                  const c = getStatusColor(h.status);
+                  return `<div style="margin-bottom:20px;position:relative;">
+                    <div style="position:absolute;left:-23px;top:3px;width:14px;height:14px;border-radius:50%;background:${isLast ? c : 'rgba(255,255,255,.08)'};box-shadow:${isLast ? `0 0 12px ${c}55` : 'none'};"></div>
+                    <div style="font-weight:600;font-size:14px;">${h.status}</div>
+                    <div class="mono" style="color:rgba(255,255,255,.2);font-size:12px;">${escapeHtml(h.time)}</div>
+                  </div>`;
+                }).join('')}
+              </div>
+              ${(t.status !== 'Resolved' && t.status !== 'Closed') ? `
+                <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <span style="color:rgba(255,255,255,.2);font-size:12px;">Simulate:</span>
+                  ${t.status === 'Open' ? `<button class="btn-secondary" data-action="ticket-progress" data-id="${t.id}">In Progress</button>` : ''}
+                  <button class="btn-secondary" data-action="ticket-resolve" data-id="${t.id}">Resolve</button>
+                </div>` : ''}
+            </div>
+          </div>`;
+      }
+
+      return `
+        <div>
+          ${sectionHeader('📡', 'Track Tickets', 'View status and history of your requests.')}
+          ${state.tickets.length === 0 ? emptyState('🛠️', 'No tickets submitted yet.', 'submitTicket', 'Submit a Ticket →') : state.tickets.map(t => `
+            <div class="card" data-action="open-ticket" data-id="${t.id}" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div style="width:48px;height:48px;border-radius:11px;overflow:hidden;flex-shrink:0;">
+                  <img src="${t.room.img}" alt="" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div>
+                  <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;"><span class="mono" style="font-size:11px;color:rgba(255,255,255,.2);">#${t.id}</span>Room ${t.room.num}</div>
+                  <div style="color:rgba(255,255,255,.4);font-size:13px;margin-top:2px;">${escapeHtml(t.description.length > 55 ? t.description.slice(0,55) + '…' : t.description)}</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">${badge(t.status)}<span style="color:rgba(255,255,255,.2);font-size:18px;">→</span></div>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    function renderContent() {
+      switch (state.tab) {
+        case 'dashboard': return renderDashboard();
+        case 'search': return renderSearch();
+        case 'book': return renderBook();
+        case 'checkin': return renderCheckin();
+        case 'myBookings': return renderMyBookings();
+        case 'submitTicket': return renderSubmitTicket();
+        case 'trackTickets': return renderTrackTickets();
+        default: return renderDashboard();
+      }
+    }
+
+    function renderApp() {
+      const NAV = [
+        { key: 'dashboard', label: 'Dashboard', icon: '📊' },
+        { key: 'search', label: 'Search Rooms', icon: '🔍' },
+        { key: 'book', label: 'Book a Room', icon: '📅' },
+        { key: 'checkin', label: 'Check In', icon: '✅' },
+        { key: 'myBookings', label: 'My Bookings', icon: '📋' },
+        { key: 'submitTicket', label: 'Submit Ticket', icon: '🛠️' },
+        { key: 'trackTickets', label: 'Track Tickets', icon: '📡' },
+      ];
+
+      app.innerHTML = `
+        <div class="app-shell">
+          ${particlesHtml()}
+          <aside class="sidebar ${state.sidebar ? '' : 'collapsed'}">
+            <div style="padding:${state.sidebar ? '20px 18px' : '20px 12px'};display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.05);">
+              <div id="toggleSidebar" style="width:40px;height:40px;min-width:40px;border-radius:12px;background:linear-gradient(135deg, #4da6ff, #22c988);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;box-shadow:0 6px 20px rgba(77,166,255,.18);">🏛️</div>
+              <div class="hidden-when-collapsed">
+                <div style="font-weight:900;font-size:16px;letter-spacing:-.5px;background:linear-gradient(135deg,#4da6ff,#22c988);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">SCFMS</div>
+                <div style="color:rgba(255,255,255,.2);font-size:10px;">Campus Facility Mgmt</div>
+              </div>
+            </div>
+            <nav style="flex:1;padding:12px 8px;overflow-y:auto;">
+              ${NAV.map(n => `<button class="nav-btn ${state.tab === n.key ? 'active' : ''}" data-action="nav" data-target="${n.key}"><span style="font-size:17px;width:24px;text-align:center;">${n.icon}</span><span class="hidden-when-collapsed">${n.label}</span></button>`).join('')}
+            </nav>
+            <div style="padding:${state.sidebar ? '14px' : '14px 8px'};border-top:1px solid rgba(255,255,255,.05);">
+              ${state.sidebar ? `
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg, #4da6ff, #22c988);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;box-shadow:0 4px 12px rgba(77,166,255,.18);">${escapeHtml(state.user.name[0])}</div>
+                  <div style="flex:1;min-width:0;" class="hidden-when-collapsed">
+                    <div style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(state.user.name)}</div>
+                    <div style="color:rgba(255,255,255,.2);font-size:11px;">${escapeHtml(state.user.email)}</div>
+                  </div>
+                  <button id="logoutBtn" title="Logout" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:16px;padding:5px;border-radius:6px;">⏻</button>
+                </div>` : `
+                <button id="logoutBtn" title="Logout" style="width:100%;background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:18px;padding:6px;">⏻</button>`}
+            </div>
+          </aside>
+          <main class="main"><div class="main-inner">${renderContent()}</div></main>
+          ${toastHtml()}
+        </div>`;
+    }
+
+    function attachEvents() {
+      if (!state.user) {
+        document.getElementById('loginForm')?.addEventListener('submit', doLogin);
+        document.getElementById('togglePw')?.addEventListener('click', () => { state.showPw = !state.showPw; render(); });
+        document.getElementById('usernameInput')?.addEventListener('input', e => { state.unInput = e.target.value; state.loginErr = ''; });
+        document.getElementById('passwordInput')?.addEventListener('input', e => { state.pwInput = e.target.value; state.loginErr = ''; });
+        document.querySelectorAll('[data-action="fill-demo"]').forEach(el => {
+          el.addEventListener('click', () => {
+            state.unInput = el.dataset.username;
+            state.pwInput = el.dataset.password;
+            state.loginErr = '';
+            render();
+          });
+        });
+        return;
+      }
+
+      document.getElementById('toggleSidebar')?.addEventListener('click', () => { state.sidebar = !state.sidebar; render(); });
+      document.getElementById('logoutBtn')?.addEventListener('click', doLogout);
+
+      document.querySelectorAll('[data-action="nav"]').forEach(el => {
+        el.addEventListener('click', () => navigate(el.dataset.target));
+      });
+
+      document.querySelector('[data-form="s"]')?.addEventListener('submit', doSearch);
+      document.querySelector('[data-form="b"]')?.addEventListener('submit', doBookSearch);
+
+      const sForm = document.querySelector('[data-form="s"]');
+      if (sForm) {
+        sForm.date.addEventListener('input', e => state.sDate = e.target.value);
+        sForm.cap.addEventListener('input', e => state.sCap = e.target.value);
+        sForm.start.addEventListener('input', e => state.sStart = e.target.value);
+        sForm.end.addEventListener('input', e => state.sEnd = e.target.value);
+      }
+      const bForm = document.querySelector('[data-form="b"]');
+      if (bForm) {
+        bForm.date.addEventListener('input', e => state.bDate = e.target.value);
+        bForm.cap.addEventListener('input', e => state.bCap = e.target.value);
+        bForm.start.addEventListener('input', e => state.bStart = e.target.value);
+        bForm.end.addEventListener('input', e => state.bEnd = e.target.value);
+      }
+
+      document.querySelectorAll('.room-card.selectable').forEach(el => {
+        el.addEventListener('click', () => {
+          state.selRoomId = Number(el.dataset.roomId);
+          render();
+        });
+      });
+
+      document.querySelector('[data-action="confirm-booking"]')?.addEventListener('click', doBookConfirm);
+      document.querySelectorAll('[data-action="cancel-booking"]').forEach(el => el.addEventListener('click', () => doCancel(Number(el.dataset.id))));
+      document.querySelectorAll('[data-action="checkin-booking"]').forEach(el => el.addEventListener('click', () => doCheckIn(Number(el.dataset.id))));
+      document.querySelectorAll('[data-action="checkout-booking"]').forEach(el => el.addEventListener('click', () => doCheckOut(Number(el.dataset.id))));
+
+      // Prefill slot from "next available" panel
+      document.querySelectorAll('[data-action="prefill-slot"]').forEach(el => {
+        el.addEventListener('click', () => {
+          const p = el.dataset.prefix;
+          if (p === 's') {
+            state.sDate = el.dataset.date;
+            state.sStart = el.dataset.start;
+            state.sEnd = el.dataset.end;
+            state.sResults = filterRooms(state.sDate, state.sStart, state.sEnd, state.sCap);
+            notify('Switched to ' + el.dataset.date + ' ' + fmtTime(el.dataset.start) + '–' + fmtTime(el.dataset.end));
+          } else {
+            state.bDate = el.dataset.date;
+            state.bStart = el.dataset.start;
+            state.bEnd = el.dataset.end;
+            state.bResults = filterRooms(state.bDate, state.bStart, state.bEnd, state.bCap);
+            state.selRoomId = null;
+            notify('Switched to ' + el.dataset.date + ' ' + fmtTime(el.dataset.start) + '–' + fmtTime(el.dataset.end));
+          }
+          render();
+        });
+      });
+
+      document.getElementById('ticketForm')?.addEventListener('submit', doSubmitTicket);
+      document.getElementById('ticketRoom')?.addEventListener('change', e => state.tRoomId = e.target.value);
+      document.getElementById('ticketDesc')?.addEventListener('input', e => state.tDesc = e.target.value);
+
+      document.querySelectorAll('[data-action="open-ticket"]').forEach(el => {
+        el.addEventListener('click', () => { state.viewTicketId = Number(el.dataset.id); render(); });
+      });
+      document.querySelector('[data-action="close-ticket-view"]')?.addEventListener('click', () => { state.viewTicketId = null; render(); });
+      document.querySelectorAll('[data-action="ticket-progress"]').forEach(el => el.addEventListener('click', () => updateTicketStatus(Number(el.dataset.id), 'In Progress')));
+      document.querySelectorAll('[data-action="ticket-resolve"]').forEach(el => el.addEventListener('click', () => updateTicketStatus(Number(el.dataset.id), 'Resolved')));
+    }
+
+    function render() {
+      if (!state.user) renderLogin();
+      else renderApp();
+      attachEvents();
+    }
+
+    render();
+  </script>
+</body>
+</html>
